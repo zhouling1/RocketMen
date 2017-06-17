@@ -23,11 +23,11 @@ public class RocketService extends Service {
     private WindowManager.LayoutParams params;
     private View mrocketView;
 
-    private Handler mHander=new Handler(){
+    private Handler mHander = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            params.y= msg.arg1;
-            mManager.updateViewLayout(mrocketView,params);
+            params.y = msg.arg1;
+            mManager.updateViewLayout(mrocketView, params);
             super.handleMessage(msg);
         }
     };
@@ -58,8 +58,8 @@ public class RocketService extends Service {
         params.type = WindowManager.LayoutParams.TYPE_PHONE;
         params.setTitle("Toast");
         params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-                //| WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        //| WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 
         params.gravity = Gravity.TOP + Gravity.LEFT;
 
@@ -71,55 +71,59 @@ public class RocketService extends Service {
 
         mrocketView.setOnTouchListener(new View.OnTouchListener() {
 
-            int startX,startY;
+            int startX, startY;
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 System.out.println("触摸");
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                      startX= (int) event.getRawX();
-                      startY= (int) event.getRawY();
+                        startX = (int) event.getRawX();
+                        startY = (int) event.getRawY();
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        int moveX= (int) event.getRawX();
-                        int moveY= (int) event.getRawY();
+                        int moveX = (int) event.getRawX();
+                        int moveY = (int) event.getRawY();
 
-                        int disX=moveX-startX;
-                        int disY=moveY-startY;
-                        params.x=params.x+disX;
-                        params.y=params.y+disY;
-                        System.out.println("disX:"+disX+"   disY:"+disY);
+                        int disX = moveX - startX;
+                        int disY = moveY - startY;
+                        params.x = params.x + disX;
+                        params.y = params.y + disY;
+
                         //容错
-                        if(params.x<0){
-                            return true;
+                        if (params.x < 0) {
+                            params.x = 0;
                         }
-                        if(params.y<0){
-                           return true;
+                        if (params.y < 0) {
+                            params.y = 0;
                         }
-                        if(params.x+mrocketView.getWidth()>screenWidth){
-                             return true;
+                        if (params.x + mrocketView.getWidth() > screenWidth) {
+                            params.x = screenWidth - mrocketView.getWidth();
                         }
-                       if(params.y+mrocketView.getHeight()>screenHeight-22){
-                           return true;
-                       }
+                        if (params.y + mrocketView.getHeight() > screenHeight - 22) {
+                            params.y = screenHeight - 22 - mrocketView.getHeight();
+                        }
 
 
+                        mManager.updateViewLayout(mrocketView, params);
+                        System.out.println("disX:" + disX + "   disY:" + disY);
 
-                        mManager.updateViewLayout(mrocketView,params);
 
-
-
-                        startX= (int) event.getRawX();
-                        startY= (int) event.getRawY();
+                        startX = (int) event.getRawX();
+                        startY = (int) event.getRawY();
 
                         break;
                     case MotionEvent.ACTION_UP:
-                         //条件判断火箭起飞
-//                       if(params.x>100&&params.x<200&&params.y>350){
-//                           System.out.println("起飞");
-//                            rocketFly();
-//                       }
+                        //条件判断火箭起飞
+                        System.out.println("起飞");
+                        System.out.println("x:" + params.x + "y:" + params.y);
+                        if (params.x > 100 && params.x < 400 && params.y > 700) {
 
+                            rocketFly();
+                        }
+                        Intent intent = new Intent(RocketService.this, RockBgActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
 
                     default:
                         break;
@@ -131,24 +135,24 @@ public class RocketService extends Service {
     }
 
     private void rocketFly() {
-      new Thread(){
-          @Override
-          public void run() {
-              for(int i=0;i<11;i++){
-                  int flyDis=350-i*35;
-                  try {
-                      sleep(50);
-                  } catch (InterruptedException e) {
+        new Thread() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 11; i++) {
+                    int flyDis = 350 - i * 35;
+                    try {
+                        sleep(50);
+                    } catch (InterruptedException e) {
 
-                  }
-                  Message msg=Message.obtain();
-                  msg.arg1=flyDis;
-                  mHander.sendMessage(msg);
-              }
-          }
+                    }
+                    Message msg = Message.obtain();
+                    msg.arg1 = flyDis;
+                    mHander.sendMessage(msg);
+                }
+            }
 
 
-      }.start();
+        }.start();
 
 
     }
